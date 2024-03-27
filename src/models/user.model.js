@@ -12,6 +12,11 @@ const userSchema = mongoose.Schema(
       trim: true,
     },
     email: {
+      type: String,
+      required: true,
+      unique: true,
+      lowercase: true,
+      trim: true
     },
     password: {
       type: String,
@@ -42,7 +47,11 @@ const userSchema = mongoose.Schema(
  * @param {string} email - The user's email
  * @returns {Promise<boolean>}
  */
-userSchema.statics.isEmailTaken = async function (email) {
+ userSchema.statics.isEmailTaken = async function (email) {
+  console.log("isEmailTaken Method in User.Model");
+  const result = await this.findOne({email: email});  
+  if(result) return false;
+  else return true;
 };
 
 
@@ -56,3 +65,7 @@ userSchema.statics.isEmailTaken = async function (email) {
 /**
  * @typedef User
  */
+ const User = mongoose.model("User", userSchema);
+
+ module.exports = { User }           ///// named Export
+ module.exports.User = User         ///// default Export
