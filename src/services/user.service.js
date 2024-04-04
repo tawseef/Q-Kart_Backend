@@ -1,7 +1,8 @@
-const { User } = require("../models");
+const  {User}   = require("../models");
 const httpStatus = require("http-status");
 const ApiError = require("../utils/ApiError");
 const bcrypt = require("bcryptjs");
+const config = require("../../src/config/config");
 
 // TODO: CRIO_TASK_MODULE_UNDERSTANDING_BASICS - Implement getUserById(id)
 /**
@@ -11,28 +12,21 @@ const bcrypt = require("bcryptjs");
  * @returns {Promise<User>}
  */
  const getUserById = async (id) => {
-    //     // console.log("id>>>>>>>>>>>>", id)
-    //     // const response = await User.find(id);
-    //     const result = await User.findById({ _id: id });
-    //     console.log(result)
-    //     //
-    //   return result;
-    try {
-      // console.log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
-      // console.log(id)
-      const data = await User.findById(id);
+    
+    // try {
+      const user = await User.findById(id);
+      // if (!user) {
+      //   throw new ApiError(httpStatus.NOT_FOUND, "User not found");
+      // }
+      console.log(user)
   
-      if (!data) {
-        throw new ApiError(httpStatus.NOT_FOUND, "User not found");
-      }
-  
-      return data;
-    } catch (error) {
-      if (error.name === "CastError" && error.kind === "ObjectId") {
-        throw new ApiError(httpStatus.BAD_REQUEST, "Invalid userId format");
-      }
-      throw error; // Rethrow other errors
-    }
+      return user;
+    // } catch (error) {
+    //   if (error.name === "CastError" && error.kind === "ObjectId") {
+    //     throw new ApiError(httpStatus.BAD_REQUEST, "Invalid userId format");
+    //   }
+    //   throw error; // Rethrow other errors
+    // }
   };
 
 // TODO: CRIO_TASK_MODULE_UNDERSTANDING_BASICS - Implement getUserByEmail(email)
@@ -46,7 +40,7 @@ const bcrypt = require("bcryptjs");
     const response = await User.findOne({ email: email });
     if (!response) {
       throw new ApiError(
-        httpStatus.BAD_REQUEST,
+        httpStatus.UNAUTHORIZED,  /// BAD_REQUEST
         '""email"" must be a present before'
       );
     }
@@ -77,13 +71,19 @@ const bcrypt = require("bcryptjs");
  * 200 status code on duplicate email - https://stackoverflow.com/a/53144807
  */
  const createUser = async (body) => {
-    console.log("Create User in User Service");
-    if(User.isEmailTaken(body.email)){
-        throw new ApiError(400, "Email is already taken.");
-    }else{
-        const result = await User.create(body);
-        return result;
+    if(await User.isEmailTaken(body.email)){
+        throw new ApiError(httpStatus.OK, "Email is already taken.");
     }
+
+    const hashedPassword = await bcrypt.hash(body.password, 10);
+
+    const result = await User.create({...body, password: hashedPassword});
+    
+    return result;
+  
+
+    // const result = await User.create(body);
+    //     return result;
 
     // /   User EmailAlreadyTaken Method from user Model
   };
@@ -94,4 +94,4 @@ const bcrypt = require("bcryptjs");
   };
   
 
-module.exports = {getUserById, createUser, getUserByEmail}
+module.exports = {getUserById, createUser, getUserByEmail, getUsers}

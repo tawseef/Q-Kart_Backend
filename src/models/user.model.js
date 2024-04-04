@@ -2,6 +2,8 @@ const mongoose = require("mongoose");
 // NOTE - "validator" external library and not the custom middleware at src/middlewares/validate.js
 const validator = require("validator");
 const config = require("../config/config");
+const bcrypt = require("bcryptjs");
+
 
 // TODO: CRIO_TASK_MODULE_UNDERSTANDING_BASICS - Complete userSchema, a Mongoose schema for "users" collection
 const userSchema = mongoose.Schema(
@@ -14,12 +16,21 @@ const userSchema = mongoose.Schema(
     email: {
       type: String,
       required: true,
-      unique: true,
-      lowercase: true,
-      trim: true
+      trim: true,
+      lowercase:true,
+      validate(value)
+      {
+        if(!validator.isEmail(value))
+        {
+          throw new Error("Invalid Email")
+        }
+      }
     },
     password: {
       type: String,
+      required: true,
+      trim: true,
+      minength:8,
       validate(value) {
         if (!value.match(/\d/) || !value.match(/[a-zA-Z]/)) {
           throw new Error(
@@ -29,6 +40,9 @@ const userSchema = mongoose.Schema(
       },
     },
     walletMoney: {
+      type: Number,
+      required: true,
+      default:config.default_wallet_money
     },
     address: {
       type: String,
@@ -40,18 +54,25 @@ const userSchema = mongoose.Schema(
     timestamps: true,
   }
 );
-
 // TODO: CRIO_TASK_MODULE_UNDERSTANDING_BASICS - Implement the isEmailTaken() static method
 /**
  * Check if email is taken
  * @param {string} email - The user's email
  * @returns {Promise<boolean>}
  */
- userSchema.statics.isEmailTaken = async function (email) {
-  console.log("isEmailTaken Method in User.Model");
+userSchema.statics.isEmailTaken = async function (email) {
   const result = await this.findOne({email: email});  
-  if(result) return false;
-  else return true;
+  return result;
+};
+
+/**
+ * Check if entered password matches the user's password
+ * @param {string} password
+ * @returns {Promise<boolean>}
+ */
+userSchema.methods.isPasswordMatch = async function (password) {
+  const user = this;
+  return bcrypt.compare(password, this.password);
 };
 
 
@@ -67,5 +88,6 @@ const userSchema = mongoose.Schema(
  */
  const User = mongoose.model("User", userSchema);
 
- module.exports = { User }           ///// named Export
+
  module.exports.User = User         ///// default Export
+ module.exports = { User }           ///// named Export
