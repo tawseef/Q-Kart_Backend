@@ -38,5 +38,4 @@ const verifyCallback = (req, resolve, reject) => async (err, user, info) => {
     .catch((err) => next(err));
 };
 
-
 module.exports = auth;

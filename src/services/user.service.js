@@ -18,7 +18,7 @@ const config = require("../../src/config/config");
       // if (!user) {
       //   throw new ApiError(httpStatus.NOT_FOUND, "User not found");
       // }
-      console.log(user)
+      // console.log(user)
   
       return user;
     // } catch (error) {
@@ -94,4 +94,36 @@ const config = require("../../src/config/config");
   };
   
 
-module.exports = {getUserById, createUser, getUserByEmail, getUsers}
+
+
+// TODO: CRIO_TASK_MODULE_CART - Implement getUserAddressById()
+/**
+ * Get subset of user's data by id
+ * - Should fetch from Mongo only the email and address fields for the user apart from the id
+ *
+ * @param {ObjectId} id
+ * @returns {Promise<User>}
+ */
+
+const getUserAddressById = async (id) => {
+  // const user  = await User.findOne({_id:id});    //////////   for TEST
+//   const user  = await User.findById(id);
+//   return user;
+return User.findOne({_id:id},{email:1,address:1})
+};
+
+
+/**
+ * Set user's shipping address
+ * @param {String} email
+ * @returns {String}
+ */
+const setAddress = async (user, newAddress) => {
+  user.address = newAddress;
+  await user.save();
+
+  return user.address;
+};
+
+
+module.exports = { getUserById, createUser, getUserByEmail, getUsers, setAddress, getUserAddressById }

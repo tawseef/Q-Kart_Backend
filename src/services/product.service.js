@@ -6,6 +6,7 @@ const { Product } = require("../models");
  * @returns {Promise<User>}
  */
 const getProductById = async (id) => {
+  console.log("Product Service")
   return Product.findById(id);
 };
 

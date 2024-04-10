@@ -9,10 +9,16 @@ const router = express.Router();
 
 const auth = require("../../middlewares/auth");
 
-router.get("/:userId", auth, validate(userValidation.getUser), userController.getUser)
+router.get("/:userId", auth, validate(userValidation.getUser), userController.getUser);
 
 // const router = express.Router();
 
 
+router.put(
+  "/:userId",
+  auth,
+  validate(userValidation.setAddress),
+  userController.setAddress
+);
 
 module.exports = router;
