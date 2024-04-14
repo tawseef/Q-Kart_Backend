@@ -31,45 +31,26 @@ const { cartService } = require("../services");
  * 
  *
  */
-
-// const getCart = catchAsync(async (req, res) => {
-//   // console.log("get Cart")
-//   const cart = await cartService.getCartByUser(req.user);
-//   res.send(cart);
-// });
 const getCart = catchAsync(async (req, res) => {
   const cart = await cartService.getCartByUser(req.user);
   res.send(cart);
 });
-
-
 
 /**
  * Add a product to cart
  *
  *
  */
-// const addProductToCart = catchAsync(async (req, res) => {
-//   console.log(req.user)
-//   const cart = await cartService.addProductToCart(
-//     req.user,
-//     req.body.productId,
-//     req.body.quantity
-//   );
-
-//   res.status(httpStatus.CREATED).send(cart);
-// });
 const addProductToCart = catchAsync(async (req, res) => {
   const cart = await cartService.addProductToCart(
     req.user,
     req.body.productId,
     req.body.quantity
   );
-    console.log(cart)
+
   res.status(httpStatus.CREATED).send(cart);
 });
 
-// TODO: CRIO_TASK_MODULE_CART - Implement updateProductInCart()
 /**
  * Update product quantity in cart
  * - If updated quantity > 0, 
@@ -85,33 +66,34 @@ const addProductToCart = catchAsync(async (req, res) => {
  * 
  *
  */
-// const updateProductInCart = catchAsync(async (req, res) => {
-//   console.log("UpdatCart");
-//   if(req.body.quantity === 0){
-//     await cartService.deleteProductFromCart(req.user, req.body.productId)
-//     return res.status(httpStatus.NO_CONTENT).send();
-//   }
-//   console.log("deleteProductFromCart Completed");
-
-//   const cart = await cartService.updateProductInCart(req.user, req.body.productId, req.body.quantity)
-
-//   return res.status(httpStatus.OK).send(cart);
-// });
 
 const updateProductInCart = catchAsync(async (req, res) => {
-  
-  if(req.body.quantity===0){
+  if (req.body.quantity == 0) {
     await cartService.deleteProductFromCart(req.user, req.body.productId);
     return res.status(httpStatus.NO_CONTENT).send();
   }
-  const cart = await cartService.updateProductInCart(req.user,req.body.productId, req.body.quantity) 
-  res.status(httpStatus.OK).send(cart)
+
+  const cart = await cartService.updateProductInCart(
+    req.user,
+    req.body.productId,
+    req.body.quantity
+  );
+
+  return res.status(httpStatus.OK).send(cart);
 });
 
 
+/**
+ * Checkout user's cart
+ */
+ const checkoutProductInCart = catchAsync(async (req, res) => {
+  const user = await cartService.checkout(req.user);
+  return res.status(httpStatus.NO_CONTENT).send();
+})
 
 module.exports = {
   getCart,
   addProductToCart,
   updateProductInCart,
+  checkoutProductInCart,
 };

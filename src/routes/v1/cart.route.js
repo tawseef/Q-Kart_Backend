@@ -22,5 +22,10 @@ router.put(
   cartController.updateProductInCart
 );
 
+router.put(
+  "/checkout",
+  auth,
+  cartController.checkoutProductInCart
+)
 
 module.exports = router;

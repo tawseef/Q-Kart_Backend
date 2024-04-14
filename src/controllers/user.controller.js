@@ -94,23 +94,42 @@ const getUser = catchAsync(async (req, res) => {
 
 
 const setAddress = catchAsync(async (req, res) => {
+  
   const user = await userService.getUserById(req.params.userId);
-
   if (!user) {
     throw new ApiError(httpStatus.NOT_FOUND, "User not found");
   }
+  
   if (user.email != req.user.email) {
     throw new ApiError(
       httpStatus.FORBIDDEN,
       "User not authorized to access this resource"
-    );
-  }
-
-  const address = await userService.setAddress(user, req.body.address);
+      );
+    }
+    
+    const address = await userService.setAddress(user, req.body.address);
 
   res.send({
     address: address,
   });
+  
+  // const user = await userService.getUserById(req.params.userId);
+
+  // if (!user) {
+  //   throw new ApiError(httpStatus.NOT_FOUND, "User not found");
+  // }
+  // if (user.email != req.user.email) {
+  //   throw new ApiError(
+  //     httpStatus.FORBIDDEN,
+  //     "User not authorized to access this resource"
+  //   );
+  // }
+
+  // const address = await userService.setAddress(user, req.body.address);
+
+  // res.send({
+  //   address: address,
+  // });
 });
 
 module.exports = {

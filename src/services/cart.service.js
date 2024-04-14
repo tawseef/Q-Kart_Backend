@@ -1,5 +1,5 @@
 const httpStatus = require("http-status");
-const { Cart, Product } = require("../models");
+const { Cart, Product,User } = require("../models");
 const ApiError = require("../utils/ApiError");
 const config = require("../config/config");
 const { userService } = require("./user.service");
@@ -153,7 +153,7 @@ if (exists) {
 
 
 const product = await Product.findOne({_id:productId})
-console.log(product)
+
 if(!product){
   throw new ApiError(httpStatus.BAD_REQUEST,"product doesn't exist in the database")
 }
@@ -300,9 +300,65 @@ const deleteProductFromCart = async (user, productId) => {
 };
 
 
+// TODO: CRIO_TASK_MODULE_TEST - Implement checkout function
+/**
+ * Checkout a users cart.
+ * On success, users cart must have no products.
+ *
+ * @param {User} user
+ * @returns {Promise}
+ * @throws {ApiError} when cart is invalid
+ */
+
+const checkout = async (user) => {
+  
+  const getUserCart = await Cart.findOne({email:user.email})
+ 
+  if(getUserCart == null){
+    throw new ApiError(httpStatus.NOT_FOUND,"User does not have a cart");
+  }
+  if(getUserCart.cartItems.length==0)
+  {
+    throw new ApiError(httpStatus.BAD_REQUEST,"User does not have items in the cart");
+  }
+
+  const hasDefaultAddress = await user.hasSetNonDefaultAddress();
+  
+  if(!hasDefaultAddress){
+    throw new ApiError(httpStatus.BAD_REQUEST,"Address not set");
+  }
+
+
+  const totalCost = getUserCart.cartItems.reduce((acc,item)=>{return acc = acc+ item.product.cost *item.quantity}, 0)
+
+  if(totalCost > user.walletMoney){
+    throw new ApiError(httpStatus.BAD_REQUEST,"User does not have sufficient balance");
+  }
+
+  user.walletMoney = user.walletMoney - totalCost;
+  user=new User(user)
+  await user.save();
+
+  const success = getUserCart;
+  
+  if(!Boolean(success)){
+    throw new ApiError(httpStatus.NOT_FOUND,"Cart not exist")
+  }
+
+
+  
+  const cartId = await Cart.findOne({email:user.email})
+  await Cart.findByIdAndRemove(cartId._id);
+
+  getUserCart.cartItems= []
+  await getUserCart.save();
+  // return success;  
+};
+
 module.exports = {
   getCartByUser,
   addProductToCart,
   updateProductInCart,
   deleteProductFromCart,
+  checkout,
 };

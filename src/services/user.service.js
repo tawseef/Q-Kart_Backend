@@ -36,17 +36,23 @@ const config = require("../../src/config/config");
  * @param {string} email
  * @returns {Promise<User>}
  */
- const getUserByEmail = async (email) => {
-    const response = await User.findOne({ email: email });
-    if (!response) {
-      throw new ApiError(
-        httpStatus.UNAUTHORIZED,  /// BAD_REQUEST
-        '""email"" must be a present before'
-      );
-    }
+//  const getUserByEmail = async (email) => {
+//     const response = await User.find({email: email});
+//     // const response = await User.findOne({ email: email });
+//     if (!response) {
+//       throw new ApiError(
+//         httpStatus.UNAUTHORIZED,  /// BAD_REQUEST
+//         '""email"" must be a present before'
+//       );
+//     }
   
-    return response;
-  };
+//     return response;
+//   };
+const getUserByEmail = async(email) => {
+  const theUser = await User.findOne({ email });
+  // console.log("theUserByMailId",theUser)
+  return theUser;
+}
 
 // TODO: CRIO_TASK_MODULE_UNDERSTANDING_BASICS - Implement createUser(user)
 /**

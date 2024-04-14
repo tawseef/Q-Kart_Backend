@@ -25,7 +25,6 @@ const cartSchema = mongoose.Schema(
 );
 
 
-
 /**
  * @typedef Cart
  */

@@ -1,6 +1,8 @@
 const httpStatus = require("http-status");
 const userService = require("./user.service");
 const ApiError = require("../utils/ApiError");
+const User = require("../models");
+const bcrypt = require("bcryptjs");
 
 /**
  * Login with username and password
@@ -14,18 +16,31 @@ const ApiError = require("../utils/ApiError");
  * @param {string} password
  * @returns {Promise<User>}
  */
+// const loginUserWithEmailAndPassword = async (email, password) => {
+//   const user = await userService.getUserByEmail(email);
+//   // console.log("await user.isPasswordMatch(password)");
+//   // console.log(await User.isPasswordMatch(password));
+//   // if(!user || !(await user.isPasswordMatch(password))){ 
+//   //   throw new  ApiError(httpStatus.UNAUTHORIZED, "Incorrect email or password");
+//   // }
+//   if(!user){ 
+//     throw new ApiError(httpStatus.UNAUTHORIZED);
+//   }
+//   else if(!(await user.isPasswordMatch(password))){
+//     throw new ApiError(httpStatus.UNAUTHORIZED);
+//   }
+//   return user;
+// };
 const loginUserWithEmailAndPassword = async (email, password) => {
-  const user = await userService.getUserByEmail(email);
-  // if(!user || !(await user.isPasswordMatch(password))){ 
-  //   throw new  ApiError(httpStatus.UNAUTHORIZED, "Incorrect email or password");
-  // }
-  if(!user){ 
-    throw new ApiError(httpStatus.UNAUTHORIZED);
-  }else if(!(await user.isPasswordMatch(password))){
-    throw new ApiError(httpStatus.UNAUTHORIZED);
+  const user = await userService.getUserByEmail(email)
+  if(!user || !(await user.isPasswordMatch(password)))
+  {
+    throw new ApiError(httpStatus.UNAUTHORIZED,"Incorrect Credentials")
   }
-  return user;
+  // return {_id:user._id,walletMoney:parseInt(user.walletMoney),name:user.name,email:user.email,password:user.password,address:user.address};
+  return user
 };
+
 
 module.exports = {
   loginUserWithEmailAndPassword,
