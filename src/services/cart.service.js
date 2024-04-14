@@ -130,26 +130,6 @@ if (exists) {
 }
 
 
-///////////////////impleme mins
-// console.log(cart.cartItems);
-// // console.log(cart.cartItems.length);
-// // console.log(cart.cartItems[0].product._id);
-// let pointer = -1;
-//   for(let i=0; i<cart.cartItems.length; i++){
-//     if(productId === cart.cartItems[i].product._id){
-//       pointer = i;
-//       break;
-//     }
-//   }
-//   if (pointer===-1) {
-//     throw new ApiError(
-//       httpStatus.BAD_REQUEST,
-//       "Product is already present in cart, Use the cart side bar to update or remove from the cart"
-//     );
-//     }
-
-
-///////////////////impleme mins
 
 
 const product = await Product.findOne({_id:productId})
@@ -310,50 +290,83 @@ const deleteProductFromCart = async (user, productId) => {
  * @throws {ApiError} when cart is invalid
  */
 
-const checkout = async (user) => {
+// const checkout = async (user) => {
   
-  const getUserCart = await Cart.findOne({email:user.email})
+//   const getUserCart = await Cart.findOne({email:user.email})
  
-  if(getUserCart == null){
+//   if(!getUserCart){
+//     throw new ApiError(httpStatus.NOT_FOUND,"User does not have a cart");
+//   }
+//   if(getUserCart.cartItems.length ===0)
+//   {
+//     throw new ApiError(httpStatus.BAD_REQUEST,"User does not have items in the cart");
+//   }
+
+//   const hasDefaultAddress = await user.hasSetNonDefaultAddress();
+  
+//   if(!hasDefaultAddress){
+//     throw new ApiError(httpStatus.BAD_REQUEST,"Address is not set");
+//   }
+
+
+//   const totalCost = getUserCart.cartItems.reduce((acc,item)=>{ 
+//     acc = acc+ item.product.cost *item.quantity
+//     return acc;
+//     }, 0)
+
+//   if(totalCost > user.walletMoney){
+//     throw new ApiError(httpStatus.BAD_REQUEST,"User does not have sufficient balance");
+//   }
+
+//   user.walletMoney = user.walletMoney - totalCost;
+//   user=new User(user)
+//   await user.save();
+
+//   const success = getUserCart;
+  
+//   if(!Boolean(success)){
+//     throw new ApiError(httpStatus.NOT_FOUND,"Cart not exist")
+//   }
+
+//   const cartId = await Cart.findOne({email:user.email})
+//   await Cart.findByIdAndRemove(cartId._id);
+
+//   getUserCart.cartItems= []
+//   await getUserCart.save();
+//   // return success;  
+// };
+
+const checkout = async (user) => {
+  const cart = await Cart.findOne({email:user.email})
+
+  if(cart == null){
     throw new ApiError(httpStatus.NOT_FOUND,"User does not have a cart");
   }
-  if(getUserCart.cartItems.length==0)
+  if(cart.cartItems.length==0)
   {
     throw new ApiError(httpStatus.BAD_REQUEST,"User does not have items in the cart");
   }
 
-  const hasDefaultAddress = await user.hasSetNonDefaultAddress();
-  
-  if(!hasDefaultAddress){
-    throw new ApiError(httpStatus.BAD_REQUEST,"Address not set");
+  const hasSetNonDefaultAddress = await user.hasSetNonDefaultAddress();
+  if(!hasSetNonDefaultAddress)
+  throw new ApiError(httpStatus.BAD_REQUEST,"Address not set");
+
+  const total = cart.cartItems.reduce((acc,item)=>{
+    acc=acc+(item.product.cost *item.quantity);
+    return acc;
+  },0)
+
+  if(total > user.walletMoney){
+    throw new ApiError(httpStatus.BAD_REQUEST,"User does not have sufficient balance")
   }
-
-
-  const totalCost = getUserCart.cartItems.reduce((acc,item)=>{return acc = acc+ item.product.cost *item.quantity}, 0)
-
-  if(totalCost > user.walletMoney){
-    throw new ApiError(httpStatus.BAD_REQUEST,"User does not have sufficient balance");
-  }
-
-  user.walletMoney = user.walletMoney - totalCost;
-  user=new User(user)
+  user.walletMoney -= total;
   await user.save();
 
-  const success = getUserCart;
-  
-  if(!Boolean(success)){
-    throw new ApiError(httpStatus.NOT_FOUND,"Cart not exist")
-  }
-
-
-  
-  const cartId = await Cart.findOne({email:user.email})
-  await Cart.findByIdAndRemove(cartId._id);
-
-  getUserCart.cartItems= []
-  await getUserCart.save();
-  // return success;  
+  cart.cartItems= []
+  await cart.save();
 };
+
+
 
 module.exports = {
   getCartByUser,

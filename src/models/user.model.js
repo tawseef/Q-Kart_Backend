@@ -88,7 +88,7 @@ userSchema.statics.isEmailTaken = async function (email) {
  */
 userSchema.methods.hasSetNonDefaultAddress = async function () {
   const user = this;
-   return user.address === config.default_address;
+   return user.address !== config.default_address;
 };
 
 /*
